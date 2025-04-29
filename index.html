@@ -3,257 +3,705 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор дневого бюджета</title>
+    <title>Умный Бюджет-Планировщик</title>
     <style>
+        :root {
+            --light-bg: #f5f7fa;
+            --light-card: #ffffff;
+            --dark-bg: #1e1e2f;
+            --dark-card: #2d2d44;
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --text-light: #34495e;
+            --text-dark: #ecf0f1;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg: var(--dark-bg);
+            --card: var(--dark-card);
+            --text: var(--text-dark);
+            --accent: var(--secondary);
+        }
+
+        [data-theme="light"] {
+            --bg: var(--light-bg);
+            --card: var(--light-card);
+            --text: var(--text-light);
+            --accent: var(--secondary);
+        }
+
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
             min-height: 100vh;
-            background-color: #f4f4f4;
         }
+
         .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 600px;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 16px;
         }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
         h1 {
+            font-size: 1.5em;
+            margin: 0;
+            color: var(--accent);
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+            flex-grow: 1;
         }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
+
+        .toggle-theme {
+            width: 40px;
+            height: 24px;
+            border-radius: 12px;
+            background: var(--accent);
+            position: relative;
             cursor: pointer;
-            margin-top: 10px;
+            transition: var(--transition);
         }
+
+        .toggle-theme::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        [data-theme="dark"] .toggle-theme::after {
+            transform: translateX(16px);
+        }
+
+        .section {
+            background-color: var(--card);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="number"], select, input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
         .btn:hover {
-            background-color: #0056b3;
+            filter: brightness(1.1);
         }
-        #budgetBlock {
-            margin-top: 20px;
+
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 16px 0;
         }
-        #budgetBlock h3, #budgetBlock p {
-            text-align: center;
-            margin: 10px 0;
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.5s ease-in-out, background-color 0.3s ease;
         }
-        #budgetBlock input {
-            margin-top: 10px;
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
         }
-        .day-row {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-            margin-bottom: 10px;
+
+        .stat-item {
+            background: #f0f3f7;
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            border-radius: var(--border-radius);
         }
-        .day-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+
+        .history-day {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            margin: 8px 0;
+            position: relative;
         }
-        .final-results {
-            text-align: center;
-            margin-top: 20px;
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-top: 8px;
         }
-        .final-results h3 {
-            color: #007BFF;
+
+        .success-badge { background: var(--success); color: white; }
+        .danger-badge { background: var(--danger); color: white; }
+        .warning-badge { background: var(--warning); color: white; }
+
+        canvas {
+            max-width: 100%;
+            height: 200px !important;
         }
-        .final-results p {
-            margin: 10px 0;
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .restart-btn {
-            margin-top: 20px;
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group:last-child {
+                margin-bottom: 0;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>💰 Умный Бюджет-Планировщик</h1>
+            <div class="toggle-theme" onclick="toggleTheme()"></div>
+        </header>
 
-<div class="container">
-    <h1>Калькулятор дневного бюджета</h1>
+        <!-- Блок настроек -->
+        <div id="setupForm" class="section">
+            <h2>⚙️ Настройка бюджета</h2>
+            <div class="input-group">
+                <label for="salary">Ваш доход</label>
+                <input type="number" id="salary" placeholder="Пример: 100000" min="0">
+            </div>
+            <div class="input-group">
+                <label for="fixed_expenses">Обязательные расходы</label>
+                <input type="number" id="fixed_expenses" placeholder="Коммуналка, кредиты" min="0">
+            </div>
+            <div class="input-group">
+                <label for="payday_date">Дата следующей зарплаты</label>
+                <input type="date" id="payday_date">
+            </div>
+            <button class="btn" onclick="startBudget()">🚀 Начать расчет</button>
+        </div>
 
-    <div class="input-group">
-        <label for="salary">1. Введите вашу зарплату (₽/мес):</label>
-        <input type="number" id="salary" placeholder="Например, 100000">
+        <!-- Основной блок -->
+        <div id="budgetBlock" class="section" style="display: none;">
+            <h2 id="currentDayLabel">📅 День 1</h2>
+            
+            <canvas id="spendingChart"></canvas>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="dailyProgress"></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <p>📐 Ежедневный лимит:</p>
+                    <strong id="dailyLimitLabel"></strong>
+                </div>
+                <div class="stat-item">
+                    <p>💰 Остаток на сегодня:</p>
+                    <strong id="remainingToday"></strong>
+                </div>
+                <div class="stat-item">
+                    <p>📈 Средний расход:</p>
+                    <span id="averageSpendingLabel"></span>
+                </div>
+                <div class="stat-item">
+                    <p>📊 Медиана расходов:</p>
+                    <span id="medianSpendingLabel"></span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="spent_today">💸 Сколько потратили сегодня?</label>
+                <input type="number" id="spent_today" placeholder="Введите сумму" min="0">
+                <small>Введите 0, если ничего не тратили</small>
+            </div>
+            <div class="action-buttons">
+                <button class="btn" onclick="nextDay()">⏭️ Следующий день</button>
+                <button class="btn" onclick="addCustomExpense()">➕ Добавить расход</button>
+            </div>
+            
+            <div id="history"></div>
+            <button class="btn" id="restartBtn" onclick="restartBudget()" style="display: none;">🔄 Новый расчет</button>
+            <button class="btn" onclick="exportData()">📤 Экспортировать данные</button>
+        </div>
     </div>
 
-    <div class="input-group">
-        <label for="fixed_expenses">2. Обязательные расходы (₽/мес):</label>
-        <input type="number" id="fixed_expenses" placeholder="Ипотека, коммуналка">
-    </div>
+    <!-- Подключение Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Основной JavaScript -->
+    <script>
+        // Инициализация состояния
+        let state = {
+            dailyLimit: 0,
+            availableBudget: 0,
+            daysLeft: 0,
+            currentDay: 1,
+            history: [],
+            customExpenses: []
+        };
 
-    <div class="input-group">
-        <label for="days_left">3. Сколько дней до следующей зарплаты?</label>
-        <input type="number" id="days_left" placeholder="Например, 25">
-    </div>
+        // Хранилище для графика
+        let chartInstance = null;
 
-    <button class="btn" onclick="startBudget()">Начать расчет</button>
-
-    <div id="budgetBlock" style="display: none;">
-        <h3 id="currentDayLabel">День 1</h3>
-        <p id="dailyLimitLabel"></p>
-        <p id="bonusLabel"></p>
-        <label for="spent_today">Сколько потратили сегодня?</label>
-        <input type="number" id="spent_today" placeholder="0 ₽">
-        <button class="btn" onclick="nextDay()">Потратил!</button>
-        <div id="history"></div>
-        <button class="btn restart-btn" id="restartBtn" onclick="restartBudget()" style="display: none;">Начать новый расчет</button>
-    </div>
-</div>
-
-<script>
-    let dailyLimit = 0;
-    let availableBudget = 0;
-    let initialDaysLeft = 0;
-    let daysLeft = 0;
-    let currentDay = 1;
-    let history = [];
-    let totalBonus = 0;
-    let initialBudget = 0;
-
-    function startBudget() {
-        const salary = parseFloat(document.getElementById('salary').value);
-        const fixedExpenses = parseFloat(document.getElementById('fixed_expenses').value);
-        initialDaysLeft = daysLeft = parseInt(document.getElementById('days_left').value);
-
-        if (isNaN(salary) || salary <= 0 ||
-            isNaN(fixedExpenses) || fixedExpenses < 0 ||
-            isNaN(daysLeft) || daysLeft <= 0) {
-            alert("Введите корректные данные!");
-            return;
+        // Инициализация приложения
+        function init() {
+            loadThemePreference();
+            loadFromLocalStorage();
+            setupEventListeners();
         }
 
-        availableBudget = salary - fixedExpenses;
-        initialBudget = availableBudget;
-        dailyLimit = availableBudget / daysLeft;
-
-        document.getElementById('budgetBlock').style.display = 'block';
-        document.getElementById('currentDayLabel').innerText = `День ${currentDay}`;
-        document.getElementById('dailyLimitLabel').innerText = `Лимит на сегодня: ${dailyLimit.toFixed(2)} ₽`;
-        document.getElementById('bonusLabel').innerText = `Бонус/Долг: ${totalBonus.toFixed(2)} ₽`;
-        document.getElementById('restartBtn').style.display = 'none';
-    }
-
-    function nextDay() {
-        const spentToday = parseFloat(document.getElementById('spent_today').value);
-        if (isNaN(spentToday) || spentToday < 0) {
-            alert("Введите корректную сумму!");
-            return;
+        // Настройка событий
+        function setupEventListeners() {
+            document.getElementById('payday_date')?.addEventListener('change', calculateDaysLeft);
         }
 
-        const dailyBonus = dailyLimit - spentToday;
-        totalBonus += dailyBonus;
+        // Переключение темы
+        function toggleTheme() {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
 
-        history.push({
-            day: currentDay,
-            limit: dailyLimit,
-            spent: spentToday,
-            remaining: dailyBonus,
-            bonus: totalBonus,
-            savingsPercentage: (dailyBonus / dailyLimit) * 100
+        // Загрузка предпочтительной темы
+        function loadThemePreference() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        // Расчет количества дней до зарплаты
+        function calculateDaysLeft() {
+            const paydayDate = new Date(document.getElementById('payday_date').value);
+            if (!paydayDate.getTime()) return;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const diffTime = paydayDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('days_left').value = Math.max(1, diffDays);
+        }
+
+        // Начало расчета бюджета
+        function startBudget() {
+            const salary = parseFloat(document.getElementById('salary').value);
+            const fixedExpenses = parseFloat(document.getElementById('fixed_expenses').value);
+            const daysLeftInput = parseInt(document.getElementById('days_left').value);
+
+            if (!salary || salary <= 0) {
+                showError("Зарплата должна быть положительным числом");
+                return;
+            }
+            if (fixedExpenses < 0) {
+                showError("Расходы не могут быть отрицательными");
+                return;
+            }
+            if (daysLeftInput <= 0) {
+                showError("Количество дней должно быть больше нуля");
+                return;
+            }
+
+            state.availableBudget = salary - fixedExpenses;
+            state.daysLeft = daysLeftInput;
+            state.dailyLimit = state.availableBudget / state.daysLeft;
+            state.currentDay = 1;
+            state.history = [];
+            state.customExpenses = [];
+
+            document.getElementById('setupForm').style.display = 'none';
+            document.getElementById('budgetBlock').style.display = 'block';
+
+            updateUI();
+            createChart();
+            saveToLocalStorage();
+        }
+
+        // Переход к следующему дню
+        function nextDay() {
+            const spentTodayInput = document.getElementById('spent_today');
+            const spentToday = parseFloat(spentTodayInput.value);
+
+            if (isNaN(spentToday) || spentToday < 0) {
+                showError("⚠️ Введите корректную сумму!");
+                return;
+            }
+
+            state.availableBudget -= spentToday;
+            state.daysLeft--;
+
+            state.history.push({
+                day: state.currentDay,
+                spent: spentToday,
+                limit: state.dailyLimit,
+                date: new Date().toISOString().split('T')[0]
+            });
+
+            if (state.daysLeft > 0) {
+                state.dailyLimit = state.availableBudget / state.daysLeft;
+                state.currentDay++;
+                updateUI();
+            } else {
+                showFinalResults();
+            }
+
+            spentTodayInput.value = '';
+            updateHistory();
+            updateChart();
+            saveToLocalStorage();
+        }
+
+        // Добавление пользовательского расхода
+        function addCustomExpense() {
+            const spentToday = prompt("Введите сумму расхода:");
+            if (spentToday === null) return;
+
+            const amount = parseFloat(spentToday);
+            if (isNaN(amount) || amount < 0) {
+                alert("⚠️ Введите корректную сумму!");
+                return;
+            }
+
+            state.availableBudget -= amount;
+            state.customExpenses.push({
+                amount,
+                date: new Date().toISOString()
+            });
+
+            updateUI();
+            updateHistory();
+            updateChart();
+            saveToLocalStorage();
+
+            alert(`✅ Добавлено: ${amount}₽`);
+        }
+
+        // Обновление пользовательского интерфейса
+        function updateUI() {
+            document.getElementById('currentDayLabel').textContent = `📅 День ${state.currentDay}`;
+            document.getElementById('dailyLimitLabel').textContent = `${state.dailyLimit.toFixed(2)} ₽`;
+
+            const lastDayData = state.history[state.history.length - 1];
+            const remainingTodayElement = document.getElementById('remainingToday');
+
+            if (lastDayData) {
+                const remaining = state.dailyLimit - lastDayData.spent;
+                remainingTodayElement.innerHTML = `
+                    ${remaining.toFixed(2)} ₽ 
+                    <span style="font-size: 0.8em; color: ${remaining >= 0 ? 'green' : 'red'}">
+                        (${(remaining/state.dailyLimit*100).toFixed(1)}%)
+                    </span>
+                `;
+                
+                const progress = Math.min((lastDayData.spent / state.dailyLimit) * 100, 100);
+                const progressBar = document.getElementById('dailyProgress');
+                progressBar.style.width = `${progress}%`;
+                progressBar.style.backgroundColor = 
+                    (lastDayData.spent <= state.dailyLimit) ? 'var(--success)' : 'var(--danger)';
+            } else {
+                remainingTodayElement.textContent = `${state.dailyLimit.toFixed(2)} ₽`;
+            }
+
+            updateStatistics();
+        }
+
+        // Обновление статистики
+        function updateStatistics() {
+            if (state.history.length === 0) return;
+
+            const spentValues = state.history.map(d => d.spent);
+            const average = spentValues.reduce((a, b) => a + b, 0) / spentValues.length;
+            const sorted = [...spentValues].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+
+            document.getElementById('averageSpendingLabel').innerHTML = `
+                ${average.toFixed(2)} ₽ 
+                <span style="font-size: 0.8em;">(${(average / state.dailyLimit * 100).toFixed(1)}%)</span>
+            `;
+            
+            document.getElementById('medianSpendingLabel').innerHTML = `
+                ${median.toFixed(2)} ₽ 
+                <span style="font-size: 0.8em;">(${(median / state.dailyLimit * 100).toFixed(1)}%)</span>
+            `;
+        }
+
+        // Обновление истории
+        function updateHistory() {
+            const historyContainer = document.getElementById('history');
+            historyContainer.innerHTML = '';
+
+            if (state.history.length === 0 && state.customExpenses.length === 0) {
+                historyContainer.innerHTML = '<p class="text-center">📝 Нет данных о расходах</p>';
+                return;
+            }
+
+            // Отображение истории по дням
+            state.history.forEach(day => {
+                const remaining = day.limit - day.spent;
+                const container = document.createElement('div');
+                container.className = 'history-day';
+                container.innerHTML = `
+                    <strong>День ${day.day}</strong> | ${new Date(day.date).toLocaleDateString()}
+                    <div class="badge ${remaining >= 0 ? 'success-badge' : 'danger-badge'}">
+                        ${remaining >= 0 ? '✅ Сэкономлено' : '⚠️ Перерасход'}
+                    </div>
+                    <div>
+                        Лимит: ${day.limit.toFixed(2)} ₽<br>
+                        Потрачено: ${day.spent.toFixed(2)} ₽<br>
+                        Остаток: <strong>${remaining.toFixed(2)} ₽</strong>
+                    </div>
+                `;
+                historyContainer.appendChild(container);
+            });
+
+            // Отображение пользовательских расходов
+            if (state.customExpenses.length > 0) {
+                const expensesHeader = document.createElement('h3');
+                expensesHeader.textContent = '🧾 Дополнительные расходы:';
+                historyContainer.appendChild(expensesHeader);
+
+                state.customExpenses.forEach(expense => {
+                    const container = document.createElement('div');
+                    container.className = 'history-day';
+                    container.innerHTML = `
+                        <strong>${parseFloat(expense.amount).toFixed(2)} ₽</strong>
+                        <div class="badge warning-badge">Дополнительно</div>
+                        <div>${new Date(expense.date).toLocaleString()}</div>
+                    `;
+                    historyContainer.appendChild(container);
+                });
+            }
+        }
+
+        // Отображение финальных результатов
+        function showFinalResults() {
+            const finalHTML = `
+                <div class="history-day" style="background: ${state.availableBudget >= 0 ? '#e8f5e9' : '#ffebee'}; border-left-color: ${state.availableBudget >= 0 ? '#27ae60' : '#e74c3c'}">
+                    <h3>🏁 Итоги</h3>
+                    <p>Общий ${state.availableBudget >= 0 ? 'бонус' : 'долг'}: 
+                        <strong style="color: ${state.availableBudget >= 0 ? '#27ae60' : '#e74c3c'}">
+                            ${state.availableBudget.toFixed(2)} ₽
+                        </strong>
+                    </p>
+                    <p>${state.availableBudget >= 0 ? '🎉 Отлично! Вы в бюджете!' : '⚠️ Нужно быть экономнее!'}</p>
+                </div>
+            `;
+            document.getElementById('history').insertAdjacentHTML('afterbegin', finalHTML);
+            document.getElementById('restartBtn').style.display = 'block';
+            document.getElementById('spent_today').disabled = true;
+        }
+
+        // Сброс бюджета
+        function restartBudget() {
+            state = {
+                dailyLimit: 0,
+                availableBudget: 0,
+                daysLeft: 0,
+                currentDay: 1,
+                history: [],
+                customExpenses: []
+            };
+            document.getElementById('setupForm').style.display = 'block';
+            document.getElementById('budgetBlock').style.display = 'none';
+            document.getElementById('history').innerHTML = '';
+            document.getElementById('spent_today').disabled = false;
+            document.getElementById('restartBtn').style.display = 'none';
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            document.getElementById('spendingChart').innerHTML = '';
+            if (chartInstance) chartInstance.destroy();
+            localStorage.removeItem('budgetData');
+        }
+
+        // Сохранение в localStorage
+        function saveToLocalStorage() {
+            const data = {
+                ...state,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('budgetData', JSON.stringify(data));
+        }
+
+        // Загрузка из localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('budgetData');
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    
+                    // Восстанавливаем все свойства
+                    for (const key in parsedData) {
+                        if (state.hasOwnProperty(key)) {
+                            state[key] = parsedData[key];
+                        }
+                    }
+                    
+                    // Если данные есть, показываем соответствующий интерфейс
+                    if (state.history.length > 0 || state.customExpenses.length > 0) {
+                        document.getElementById('setupForm').style.display = 'none';
+                        document.getElementById('budgetBlock').style.display = 'block';
+                        updateUI();
+                        updateHistory();
+                        createChart();
+                        updateChart();
+                    }
+                } catch (error) {
+                    console.error("Ошибка при загрузке данных:", error);
+                    showError("⚠️ Не удалось загрузить сохраненные данные");
+                }
+            }
+        }
+
+        // Создание графика
+        function createChart() {
+            const ctx = document.getElementById('spendingChart');
+            if (!ctx) return;
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Расходы',
+                        data: [],
+                        borderColor: 'var(--secondary)',
+                        tension: 0.3,
+                        fill: false,
+                        pointRadius: 3
+                    }, {
+                        label: 'Лимит',
+                        data: [],
+                        borderColor: 'var(--danger)',
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => value + ' ₽'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Обновление графика
+        function updateChart() {
+            if (!chartInstance) return;
+            
+            chartInstance.data.labels = state.history.map(item => `День ${item.day}`);
+            chartInstance.data.datasets[0].data = state.history.map(item => item.spent);
+            chartInstance.data.datasets[1].data = state.history.map(item => item.limit);
+            chartInstance.update();
+        }
+
+        // Экспорт данных
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "budget-data.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Показ ошибок
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 3000);
+        }
+
+        // Автоматическая загрузка данных
+        window.addEventListener('load', () => {
+            init();
         });
-
-        updateHistory();
-
-        availableBudget -= dailyLimit;
-        currentDay++;
-        daysLeft--;
-
-        if (daysLeft > 0) {
-            dailyLimit = (availableBudget + totalBonus) / daysLeft;
-            document.getElementById('currentDayLabel').innerText = `День ${currentDay}`;
-            document.getElementById('dailyLimitLabel').innerText = `Лимит на сегодня: ${dailyLimit.toFixed(2)} ₽`;
-            document.getElementById('bonusLabel').innerText = `Бонус/Долг: ${totalBonus.toFixed(2)} ₽`;
-            document.getElementById('spent_today').value = '';
-        } else {
-            showFinalResults();
-        }
-    }
-
-    function updateHistory() {
-        const lastDay = history[history.length - 1];
-        const historyDiv = document.getElementById('history');
-
-        const dayHTML = `
-            <div class="day-row">
-                <strong>День ${lastDay.day}</strong><br>
-                Лимит: ${lastDay.limit.toFixed(2)} ₽ |
-                Потрачено: ${lastDay.spent.toFixed(2)} ₽ |
-                Остаток: ${lastDay.remaining.toFixed(2)} ₽ |
-                Бонус/Долг: ${lastDay.bonus.toFixed(2)} ₽ (${(initialBudget + lastDay.bonus).toFixed(2)} ₽) |
-                Экономия: ${lastDay.savingsPercentage.toFixed(2)}%
-                <span style="color: ${lastDay.remaining >= 0 ? 'green' : 'red'};">
-                    ${lastDay.remaining >= 0 ? '✅ В пределах' : '⚠️ Перерасход'}
-                </span>
-            </div>
-        `;
-
-        historyDiv.innerHTML = dayHTML + historyDiv.innerHTML;
-    }
-
-    function showFinalResults() {
-        const historyDiv = document.getElementById('history');
-        const finalMessage = totalBonus >= 0 ? "Поздравляем! Вы уложились в бюджет!" : "К сожалению, вы превысили бюджет.";
-
-        const finalHTML = `
-            <div class="final-results">
-                <h3>Итоги:</h3>
-                <p>Общий бонус/долг: ${totalBonus.toFixed(2)} ₽</p>
-                <p>${finalMessage}</p>
-            </div>
-        `;
-
-        historyDiv.innerHTML = finalHTML;
-        document.getElementById('spent_today').disabled = true;
-        document.querySelector('.btn').disabled = true;
-        document.getElementById('restartBtn').style.display = 'block';
-    }
-
-    function restartBudget() {
-        // Reset all variables and UI elements
-        dailyLimit = 0;
-        availableBudget = 0;
-        initialDaysLeft = 0;
-        daysLeft = 0;
-        currentDay = 1;
-        history = [];
-        totalBonus = 0;
-        initialBudget = 0;
-
-        document.getElementById('budgetBlock').style.display = 'none';
-        document.getElementById('history').innerHTML = '';
-        document.getElementById('spent_today').value = '';
-        document.getElementById('spent_today').disabled = false;
-        document.querySelector('.btn').disabled = false;
-        document.getElementById('restartBtn').style.display = 'none';
-    }
-</script>
-
+    </script>
 </body>
 </html>
