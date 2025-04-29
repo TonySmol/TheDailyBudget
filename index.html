@@ -1,479 +1,511 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Умный Бюджет-Планировщик</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --danger: #e74c3c;
-        }
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #ecf0f1;
-            color: var(--primary);
-            line-height: 1.6;
-        }
-        .container {
-            background: white;
-            max-width: 700px;
-            margin: 20px auto;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: var(--secondary);
-            margin: 0 0 25px;
-            font-size: 1.8em;
-        }
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        input:focus {
-            border-color: var(--secondary);
-            outline: none;
-        }
-        .btn {
-            background: var(--secondary);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.2s, background 0.3s;
-            width: 100%;
-            margin: 10px 0;
-        }
-        .btn:hover {
-            background: #2980b9;
-            transform: translateY(-1px);
-        }
-        .stats-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            position: relative;
-        }
-        .progress-bar {
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--secondary);
-            transition: width 0.5s ease, background-color 0.3s ease;
-        }
-        .history-day {
-            background: white;
-            border-left: 4px solid var(--secondary);
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 6px;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
-        }
-        .history-day:hover {
-            transform: translateX(5px);
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 500;
-        }
-        .success { background: var(--success); color: white; }
-        .danger { background: var(--danger); color: white; }
-        .error-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--danger);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            animation: slideIn 0.3s ease, fadeOut 2s ease 2.5s forwards;
-            z-index: 1000;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateX(100%); }
-        }
-        /* Мобильная адаптация */
-        @media (max-width: 600px) {
-            .container {
-                margin: 10px;
-                padding: 15px;
-            }
-            .btn {
-                font-size: 1em;
-                padding: 10px;
-            }
-            .stats-card {
-                font-size: 0.9em;
-            }
-            input {
-                font-size: 1em;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Расчёт дневного лимита</title>
+  <style>
+    :root {
+      --primary: #3498db;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --warning: #f1c40f;
+      --border-radius: 8px;
+      --spacing: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: var(--spacing);
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: var(--spacing);
+      color: #2c3e50;
+    }
+
+    form,
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    button.red {
+      background: var(--danger);
+      color: white;
+    }
+
+    button.yellow {
+      background: var(--warning);
+      color: #2c3e50;
+    }
+
+    button.mini-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .card {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      padding: var(--spacing);
+      margin: var(--spacing) 0;
+      position: relative;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 10px;
+      background: #ecf0f1;
+      border-radius: var(--border-radius);
+    }
+
+    .bonus.pos {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .bonus.neg {
+      color: var(--danger);
+      font-weight: bold;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      margin: 20px 0;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .day-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: var(--spacing);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    .day-info {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    @media (min-width: 600px) {
+      .button-group {
+        flex-direction: row-reverse;
+      }
+    }
+
+    .final-message {
+      background: #f1f1f1;
+      padding: 15px;
+      border-left: 4px solid var(--primary);
+      margin-top: var(--spacing);
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .total-item {
+      text-align: center;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: var(--border-radius);
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📊 Умный Бюджет-Планировщик</h1>
-        
-        <!-- Блок настроек -->
-        <div id="setupForm">
-            <div class="input-group">
-                <label>💰 Ваша зарплата (₽/месяц)</label>
-                <input type="number" id="salary" placeholder="Пример: 100000" min="0" required>
-                <small class="hint">Введите ваш ежемесячный доход</small>
-            </div>
-            <div class="input-group">
-                <label>📉 Обязательные расходы (₽)</label>
-                <input type="number" id="fixed_expenses" placeholder="Коммуналка, кредиты" min="0" required>
-                <small class="hint">Регулярные ежемесячные платежи</small>
-            </div>
-            <div class="input-group">
-                <label>📅 Дней до зарплаты</label>
-                <input type="number" id="days_left" placeholder="Пример: 25" min="1" required>
-                <small class="hint">Оставшиеся дни до следующей зарплаты</small>
-            </div>
-            <button class="btn" onclick="startBudget()">🚀 Начать расчет</button>
-        </div>
+  <div class="container">
+    <h1>Расчёт дневного лимита</h1>
 
-        <!-- Основной блок -->
-        <div id="budgetBlock" style="display: none;">
-            <div class="stats-card">
-                <h3 id="currentDayLabel">📅 День 1</h3>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="dailyProgress"></div>
-                </div>
-                <div class="stat-item">
-                    <p>📐 Лимит: <strong id="dailyLimitLabel"></strong></p>
-                    <p>💰 Остаток на сегодня: <strong id="remainingToday"></strong></p>
-                </div>
-                <div class="stat-item">
-                    <p>📈 Среднее: <span id="averageSpendingLabel"></span></p>
-                    <p>📊 Медиана: <span id="medianSpendingLabel"></span></p>
-                </div>
-            </div>
-
-            <canvas id="spendingChart" style="max-width: 100%; height: 200px;"></canvas>
-
-            <div class="input-group">
-                <label>💸 Сколько потратили сегодня?</label>
-                <input type="number" id="spent_today" placeholder="Введите сумму" min="0">
-            </div>
-            <button class="btn" onclick="nextDay()">⏭️ Следующий день</button>
-            
-            <div id="history" class="history-container"></div>
-            <button class="btn" id="restartBtn" onclick="restartBudget()" style="display: none;">🔄 Новый расчет</button>
-        </div>
+    <div id="start-screen">
+      <form onsubmit="event.preventDefault(); start();">
+        <input type="number" id="total" placeholder="Общая сумма на руках" step="any" required />
+        <input type="number" id="mandatory" placeholder="Обязательные траты" step="any" required />
+        <input type="number" id="days" placeholder="Количество дней" step="1" min="1" required />
+        <button class="primary">Начать расчёт</button>
+      </form>
     </div>
 
-    <!-- Подключение Chart.js (работает без интернета после первого загрузки) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Основной JavaScript -->
-    <script>
-        let dailyLimit = 0;
-        let availableBudget = 0;
-        let daysLeft = 0;
-        let currentDay = 1;
-        let history = [];
-        let chartInstance = null;
+    <div id="main-screen" class="hidden">
+      <div id="current-day"></div>
+      <canvas id="chart" height="150"></canvas>
+      <div style="display:flex; gap:10px;">
+        <input type="number" id="spend-input" placeholder="Ежедневная трата" step="any" />
+        <button onclick="saveSpend()">Сохранить</button>
+      </div>
+      <div id="history"></div>
+      <div class="button-group">
+        <button class="red" onclick="reset()">Сбросить</button>
+        <button class="yellow" onclick="exportData()">Экспорт CSV</button>
+      </div>
+      <div id="final-message" class="final-message hidden"></div>
+    </div>
+  </div>
 
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.textContent = message;
-            document.body.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 3000);
-        }
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script>
+    let state = JSON.parse(localStorage.getItem('budget_state')) || {
+      total: 0,
+      mandatory: 0,
+      days: 0,
+      history: [],
+      currentDay: 1,
+      saved: false
+    };
+    let chart;
 
-        function validateInputs() {
-            const salary = parseFloat(document.getElementById('salary').value);
-            const fixedExpenses = parseFloat(document.getElementById('fixed_expenses').value);
-            const daysLeftInput = parseInt(document.getElementById('days_left').value);
-            
-            if (!salary || salary <= 0) {
-                showError("Зарплата должна быть положительным числом");
-                return false;
+    function formatCurrency(value) {
+      return `${parseFloat(value).toFixed(2)} ₽`;
+    }
+
+    function saveState() {
+      localStorage.setItem('budget_state', JSON.stringify(state));
+    }
+
+    function start() {
+      const total = parseFloat(document.getElementById('total').value);
+      const mandatory = parseFloat(document.getElementById('mandatory').value);
+      const days = parseInt(document.getElementById('days').value);
+
+      if (isNaN(total) || isNaN(mandatory) || isNaN(days) || days < 1 || total <= 0) {
+        alert("Введите корректные данные!");
+        return;
+      }
+
+      state = { total, mandatory, days, history: [], currentDay: 1, saved: true };
+      saveState();
+      renderMainScreen();
+    }
+
+    function renderMainScreen() {
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('main-screen').classList.remove('hidden');
+
+      calculateStats();
+      renderCurrentDayCard();
+      renderHistory();
+      updateChart();
+
+      const finished = state.finished || getRemainingDays() <= 0;
+      document.getElementById('spend-input').disabled = finished;
+      document.getElementById('save-button')?.setAttribute('disabled', finished ? '' : null);
+    }
+
+    function calculateStats() {
+      let totalRemaining = state.total - state.mandatory;
+      for (const day of state.history) totalRemaining -= day.spend;
+
+      const remainingDays = getRemainingDays();
+
+      if (remainingDays <= 0 || totalRemaining <= 0) {
+        state.currentLimit = 0;
+        state.finished = true;
+        state.totalSurplus = Math.max(totalRemaining, 0);
+      } else {
+        state.currentLimit = +(totalRemaining / remainingDays).toFixed(2);
+        state.finished = false;
+      }
+
+      state.totalBonus = state.history.reduce((sum, day) => sum + (day.limit - day.spend), 0);
+      state.totalSpent = state.history.reduce((sum, day) => sum + day.spend, 0);
+      state.average = +(state.history.reduce((sum, day) => sum + day.spend, 0) / Math.max(state.history.length, 1)).toFixed(2);
+    }
+
+    function getRemainingDays() {
+      return state.days - state.history.length;
+    }
+
+    function renderCurrentDayCard() {
+      const container = document.getElementById('current-day');
+      const finalDay = state.history.length === state.days;
+
+      if (finalDay) {
+        container.innerHTML = `
+          <div class="card">
+            <h3>Финальная статистика</h3>
+            <div class="totals-grid">
+              <div class="total-item"><strong>Общая сумма:</strong><br>${formatCurrency(state.total)}</div>
+              <div class="total-item"><strong>Обязательные траты:</strong><br>${formatCurrency(state.mandatory)}</div>
+              <div class="total-item"><strong>Всего потрачено:</strong><br>${formatCurrency(state.totalSpent)}</div>
+              <div class="total-item"><strong>Остаток:</strong><br>${formatCurrency(state.totalSurplus)}</div>
+              <div class="total-item"><strong>Средняя трата:</strong><br>${formatCurrency(state.average)}</div>
+              <div class="total-item"><strong>Общий бонус/долг:</strong><br>${formatCurrency(state.totalBonus)}</div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const totalBonus = state.totalBonus || 0;
+      const totalSurplus = state.totalSurplus || 0;
+
+      container.innerHTML = `
+        <div class="card">
+          <h3>День ${state.currentDay} из ${state.days}</h3>
+          <div class="stats-grid">
+            <div class="stat-item"><strong>Лимит:</strong><br>${formatCurrency(state.currentLimit)}</div>
+            <div class="stat-item"><strong>Бонус/долг:</strong><br><span class="bonus ${totalBonus >= 0 ? 'pos' : 'neg'}">${formatCurrency(totalBonus)}</span></div>
+            <div class="stat-item"><strong>Денег всего:</strong><br>${formatCurrency(totalSurplus)}</div>
+            <div class="stat-item"><strong>Средняя трата:</strong><br>${formatCurrency(state.average)}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history');
+      container.innerHTML = '';
+
+      if (!state.history.length) return;
+
+      container.innerHTML = '<h3>История трат</h3><div class="history-grid">';
+      [...state.history].reverse().forEach((day, idx) => {
+        const index = state.history.length - 1 - idx;
+        const surplus = +(day.limit - day.spend).toFixed(2);
+        container.innerHTML += `
+          <div class="day-card">
+            <div class="day-header">
+              День ${day.day}
+              <div>
+                <button class="mini-btn yellow" onclick="editEntry(${index})">Ред</button>
+                <button class="mini-btn red" onclick="deleteEntry(${index})">X</button>
+              </div>
+            </div>
+            <div class="day-info"><span>Трата:</span><span>${formatCurrency(day.spend)}</span></div>
+            <div class="day-info"><span>Лимит:</span><span>${formatCurrency(day.limit)}</span></div>
+            <div class="day-info"><span>Остаток:</span><span class="bonus ${surplus >= 0 ? 'pos' : 'neg'}">${formatCurrency(surplus)}</span></div>
+          </div>`;
+      });
+      container.innerHTML += '</div>';
+    }
+
+    function saveSpend() {
+      const input = document.getElementById('spend-input');
+      const spend = parseFloat(input.value);
+
+      if (isNaN(spend) || spend < 0) {
+        alert("Введите корректную сумму");
+        return;
+      }
+
+      const totalRemaining = state.total - state.mandatory - state.history.reduce((s, d) => s + d.spend, 0);
+      const daysLeft = getRemainingDays();
+      const limit = +(totalRemaining / daysLeft).toFixed(2);
+      const surplus = +(limit - spend).toFixed(2);
+
+      state.history.push({
+        day: state.currentDay,
+        spend,
+        limit: Math.max(limit, 0),
+        surplus
+      });
+
+      state.currentDay++;
+      saveState();
+      renderMainScreen();
+      input.value = '';
+    }
+
+    function reset() {
+      if (confirm("Сбросить все данные?")) {
+        localStorage.removeItem('budget_state');
+        location.reload();
+      }
+    }
+
+    function exportData() {
+      let csv = "День,Трата,Лимит,Остаток\n";
+      state.history.forEach(d => csv += `${d.day},${d.spend},${d.limit},${+(d.limit - d.spend).toFixed(2)}\n`);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'budget.csv';
+      link.click();
+    }
+
+    function editEntry(index) {
+      const newSpend = prompt("Введите новую сумму", state.history[index].spend);
+      if (newSpend !== null && !isNaN(newSpend)) {
+        state.history[index].spend = parseFloat(newSpend);
+        recalculateFrom(index);
+        saveState();
+        renderMainScreen();
+      }
+    }
+
+    function deleteEntry(index) {
+      if (confirm("Удалить запись?")) {
+        state.history.splice(index, 1);
+        state.currentDay = index + 1;
+        recalculateFrom(index);
+        saveState();
+        renderMainScreen();
+      }
+    }
+
+    function recalculateFrom(startIndex) {
+      let totalRemaining = state.total - state.mandatory;
+      for (let i = 0; i < startIndex; i++) totalRemaining -= state.history[i].spend;
+
+      for (let i = startIndex; i < state.history.length; i++) {
+        const remainingDays = Math.max(state.days - i, 1);
+        const limit = +(totalRemaining / remainingDays).toFixed(2);
+        const surplus = +(limit - state.history[i].spend).toFixed(2);
+        state.history[i] = { ...state.history[i], limit, surplus };
+        totalRemaining -= state.history[i].spend;
+      }
+    }
+
+    function updateChart() {
+      const ctx = document.getElementById('chart').getContext('2d');
+      if (chart) chart.destroy();
+
+      const labels = state.history.map(d => `День ${d.day}`);
+      const spends = state.history.map(d => d.spend);
+      const limits = state.history.map(d => d.limit);
+      const surpluses = state.history.map(d => d.surplus);
+
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Фактическая трата',
+              data: spends,
+              borderColor: '#e74c3c',
+              backgroundColor: 'rgba(231,76,60,0.1)',
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Лимит',
+              data: limits,
+              borderColor: '#2980b9',
+              borderDash: [5, 5],
+              backgroundColor: 'rgba(41,128,185,0.1)',
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Остаток',
+              data: surpluses,
+              borderColor: '#27ae60',
+              backgroundColor: 'rgba(39,174,96,0.1)',
+              fill: true,
+              tension: 0.3
             }
-            if (fixedExpenses < 0) {
-                showError("Расходы не могут быть отрицательными");
-                return false;
-            }
-            if (daysLeftInput <= 0) {
-                showError("Количество дней должно быть больше нуля");
-                return false;
-            }
-            return true;
+          ]
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index' },
+          plugins: { legend: { position: 'top' }, tooltip: { enabled: true } },
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Сумма (₽)' } },
+            x: { title: { display: true, text: 'День' } }
+          }
         }
+      });
+    }
 
-        function startBudget() {
-            if (!validateInputs()) return;
-
-            const salary = parseFloat(document.getElementById('salary').value);
-            const fixedExpenses = parseFloat(document.getElementById('fixed_expenses').value);
-            daysLeft = parseInt(document.getElementById('days_left').value);
-            
-            availableBudget = salary - fixedExpenses;
-            dailyLimit = availableBudget / daysLeft;
-            currentDay = 1;
-            history = [];
-
-            document.getElementById('setupForm').style.display = 'none';
-            document.getElementById('budgetBlock').style.display = 'block';
-            
-            updateUI();
-            createChart();
-            saveToLocalStorage();
-        }
-
-        function nextDay() {
-            const spentTodayInput = document.getElementById('spent_today');
-            const spentToday = parseFloat(spentTodayInput.value);
-            
-            if (isNaN(spentToday) || spentToday < 0) {
-                showError("⚠️ Введите корректную сумму!");
-                return;
-            }
-
-            availableBudget -= spentToday;
-            daysLeft--;
-            
-            history.push({
-                day: currentDay,
-                spent: spentToday,
-                limit: dailyLimit
-            });
-
-            if (daysLeft > 0) {
-                dailyLimit = availableBudget / daysLeft;
-                currentDay++;
-                updateUI();
-            } else {
-                showFinalResults();
-            }
-            
-            spentTodayInput.value = '';
-            updateHistory();
-            updateChart();
-            saveToLocalStorage();
-        }
-
-        function updateUI() {
-            document.getElementById('currentDayLabel').textContent = `📅 День ${currentDay}`;
-            document.getElementById('dailyLimitLabel').textContent = `${dailyLimit.toFixed(2)} ₽`;
-            
-            const lastDayData = history[currentDay - 1];
-            const remainingTodayElement = document.getElementById('remainingToday');
-            if (lastDayData) {
-                const remaining = dailyLimit - lastDayData.spent;
-                remainingTodayElement.innerHTML = `
-                    ${remaining.toFixed(2)} ₽ 
-                    <span style="font-size: 0.8em; color: ${remaining >= 0 ? 'green' : 'red'}">
-                        (${(remaining/dailyLimit*100).toFixed(1)}%)
-                    </span>
-                `;
-                
-                const progress = Math.min((lastDayData.spent / dailyLimit) * 100, 100);
-                const progressBar = document.getElementById('dailyProgress');
-                progressBar.style.width = `${progress}%`;
-                progressBar.style.backgroundColor = 
-                    (lastDayData.spent <= dailyLimit) ? 'var(--success)' : 'var(--danger)';
-            } else {
-                remainingTodayElement.textContent = `${dailyLimit.toFixed(2)} ₽`;
-            }
-            
-            updateStatistics();
-        }
-
-        function updateStatistics() {
-            if (history.length === 0) return;
-            
-            const spentValues = history.map(d => d.spent);
-            const average = spentValues.reduce((a, b) => a + b, 0) / spentValues.length;
-            const sorted = [...spentValues].sort((a, b) => a - b);
-            const mid = Math.floor(sorted.length / 2);
-            const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-            
-            document.getElementById('averageSpendingLabel').innerHTML = `
-                ${average.toFixed(2)} ₽ 
-                <span style="font-size: 0.8em;">(${(average / dailyLimit * 100).toFixed(1)}%)</span>
-            `;
-            
-            document.getElementById('medianSpendingLabel').innerHTML = `
-                ${median.toFixed(2)} ₽ 
-                <span style="font-size: 0.8em;">(${(median / dailyLimit * 100).toFixed(1)}%)</span>
-            `;
-        }
-
-        function updateHistory() {
-            if (history.length === 0) return;
-            
-            const lastDay = history[history.length - 1];
-            const remaining = lastDay.limit - lastDay.spent;
-            
-            const dayElement = document.createElement('div');
-            dayElement.className = 'history-day';
-            dayElement.innerHTML = `
-                <strong>День ${lastDay.day}</strong>
-                <div class="badge ${remaining >= 0 ? 'success' : 'danger'}" style="margin: 8px 0;">
-                    ${remaining >= 0 ? '✅ Сэкономлено' : '⚠️ Перерасход'}
-                </div>
-                <div>
-                    Лимит: ${lastDay.limit.toFixed(2)} ₽<br>
-                    Потрачено: ${lastDay.spent.toFixed(2)} ₽<br>
-                    Остаток: <strong>${remaining.toFixed(2)} ₽</strong>
-                </div>
-            `;
-            
-            document.getElementById('history').prepend(dayElement);
-        }
-
-        function showFinalResults() {
-            const finalHTML = `
-                <div class="stats-card" style="background: ${availableBudget >= 0 ? '#e8f5e9' : '#ffebee'}">
-                    <h3>🏁 Итоги</h3>
-                    <p>Общий ${availableBudget >= 0 ? 'бонус' : 'долг'}: 
-                        <strong class="${availableBudget >= 0 ? 'success' : 'danger'}">
-                            ${availableBudget.toFixed(2)} ₽
-                        </strong>
-                    </p>
-                    <p>${availableBudget >= 0 ? '🎉 Отлично! Вы в бюджете!' : '⚠️ Нужно быть экономнее!'}</p>
-                </div>
-            `;
-            document.getElementById('history').insertAdjacentHTML('afterbegin', finalHTML);
-            document.getElementById('restartBtn').style.display = 'block';
-            document.getElementById('spent_today').disabled = true;
-        }
-
-        function restartBudget() {
-            dailyLimit = availableBudget = daysLeft = currentDay = 0;
-            history = [];
-            document.getElementById('setupForm').style.display = 'block';
-            document.getElementById('budgetBlock').style.display = 'none';
-            document.getElementById('history').innerHTML = '';
-            document.getElementById('spent_today').disabled = false;
-            document.getElementById('restartBtn').style.display = 'none';
-            document.querySelectorAll('input').forEach(i => i.value = '');
-            document.getElementById('spendingChart').innerHTML = '';
-            if (chartInstance) chartInstance.destroy();
-        }
-
-        // Работа с localStorage
-        function saveToLocalStorage() {
-            const data = {
-                dailyLimit,
-                availableBudget,
-                daysLeft,
-                currentDay,
-                history
-            };
-            localStorage.setItem('budgetData', JSON.stringify(data));
-        }
-
-        function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('budgetData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                Object.assign(window, data);
-                updateUI();
-                updateHistory();
-                createChart();
-                updateChart();
-            }
-        }
-
-        // Создание графика
-        function createChart() {
-            const ctx = document.getElementById('spendingChart');
-            if (!ctx) return;
-            
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Расходы',
-                        data: [],
-                        borderColor: 'var(--secondary)',
-                        tension: 0.3,
-                        fill: false
-                    }, {
-                        label: 'Лимит',
-                        data: [],
-                        borderColor: 'var(--danger)',
-                        borderDash: [5, 5],
-                        tension: 0.3,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top'
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => value + ' ₽'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateChart() {
-            if (!chartInstance) return;
-            
-            chartInstance.data.labels = history.map(item => `День ${item.day}`);
-            chartInstance.data.datasets[0].data = history.map(item => item.spent);
-            chartInstance.data.datasets[1].data = history.map(item => item.limit);
-            chartInstance.update();
-        }
-
-        // Автоматическая загрузка данных при запуске
-        window.addEventListener('load', loadFromLocalStorage);
-    </script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (state.saved) renderMainScreen();
+    });
+  </script>
 </body>
 </html>
